@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>HalalConnect</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --em:#0B4D31;--em2:#14693F;--em3:#1A8A52;
+  --gold:#C9A84C;--goldf:#E8C96A;--goldp:#F5E8B0;
+  --night:#070F0A;--night2:#0D1F14;--night3:#122619;
+  --cream:#FAF6ED;
+  --muted:#8BAF9A;--dim:#4D7A5E;
+  --border:rgba(201,168,76,.15);
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--night);font-family:'Outfit',sans-serif;color:var(--cream)}
+#app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;background:var(--night2)}
+
+/* ── SCREENS ── */
+#screens{flex:1;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;
+  background:linear-gradient(160deg,var(--night3) 0%,var(--night2) 100%)}
+#screens::-webkit-scrollbar{display:none}
+
+.screen{display:none;min-height:100%;padding:0 0 90px}
+.screen.active{display:block}
+
+/* ── TOP BAR ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px 14px;
+  background:rgba(7,15,10,.9);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:50;
+}
+.topbar-logo{font-family:'Amiri',serif;font-size:22px;color:var(--goldf);font-weight:700}
+.topbar-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{
+  display:flex;justify-content:space-around;align-items:center;
+  padding:10px 4px 16px;
+  background:rgba(7,15,10,.97);
+  border-top:1px solid var(--border);
+  position:sticky;bottom:0;z-index:50;
+  flex-shrink:0;
+}
+.nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 12px;border-radius:12px;cursor:pointer;
+  transition:all .2s;border:none;background:none;color:var(--muted);
+  font-family:'Outfit',sans-serif;
+}
+.nav-btn.active{background:rgba(201,168,76,.1);color:var(--goldf)}
+.nav-btn .icon{font-size:20px}
+.nav-btn .label{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+
+/* ── CARDS ── */
+.card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin:0 16px 14px}
+.card-gold{background:linear-gradient(135deg,rgba(11,77,49,.7),rgba(13,31,20,.9));border-color:rgba(201,168,76,.3)}
+.section-title{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin:20px 16px 12px}
+
+/* ── HOME ── */
+.greeting-bar{padding:20px 20px 16px;display:flex;justify-content:space-between;align-items:center}
+.greeting-name{font-size:22px;font-weight:700;color:var(--cream)}
+.greeting-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.ayah-arabic{font-family:'Amiri',serif;font-size:20px;color:var(--goldp);text-align:right;direction:rtl;line-height:2;margin:8px 0 4px}
+.ayah-trans{font-size:13px;color:var(--muted);line-height:1.6}
+.ayah-ref{font-size:11px;color:var(--gold);font-weight:700;margin-top:8px}
+.tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;margin-bottom:4px}
+.tile{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;padding:18px 14px;cursor:pointer;transition:all .2s;text-align:left}
+.tile:hover,.tile:active{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.3)}
+.tile-icon{font-size:26px;margin-bottom:10px}
+.tile-name{font-size:14px;font-weight:600;color:var(--cream)}
+.tile-desc{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── AI CHAT ── */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 140px)}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.chat-messages::-webkit-scrollbar{display:none}
+.msg{max-width:88%;animation:popIn .25s ease}
+@keyframes popIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg-ai{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:18px 18px 18px 4px;padding:14px 16px;align-self:flex-start}
+.msg-user{background:rgba(11,77,49,.5);border:1px solid rgba(201,168,76,.15);border-radius:18px 18px 4px 18px;padding:14px 16px;align-self:flex-end;text-align:right}
+.msg-text{font-size:14px;line-height:1.65;color:var(--cream)}
+.msg-ref{display:inline-block;margin-top:8px;padding:4px 10px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);border-radius:6px;font-size:11px;color:var(--goldf);font-weight:600}
+.msg-arabic{font-family:'Amiri',serif;font-size:18px;color:var(--goldp);direction:rtl;text-align:right;display:block;margin:6px 0}
+.chat-input-wrap{padding:12px 16px;background:rgba(7,15,10,.9);border-top:1px solid var(--border)}
+.chat-input-row{display:flex;gap:10px;align-items:flex-end}
+.chat-textarea{
+  flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:12px 16px;color:var(--cream);font-family:'Outfit',sans-serif;
+  font-size:14px;resize:none;outline:none;min-height:46px;max-height:100px;line-height:1.4;
+}
+.chat-textarea::placeholder{color:var(--muted)}
+.chat-textarea:focus{border-color:rgba(201,168,76,.3)}
+.send-btn{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--em3),var(--em));
+  border:1px solid rgba(201,168,76,.3);color:var(--goldf);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.send-btn:hover{transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;transform:none}
+.typing-dots{display:flex;gap:4px;align-items:center;padding:4px 0}
+.typing-dots span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:bounce .8s infinite}
+.typing-dots span:nth-child(2){animation-delay:.15s}
+.typing-dots span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.ai-welcome{text-align:center;padding:40px 20px;color:var(--muted)}
+.ai-welcome .ai-icon{font-size:48px;margin-bottom:12px}
+.ai-welcome h3{font-size:18px;color:var(--cream);margin-bottom:8px}
+.ai-welcome p{font-size:13px;line-height:1.6}
+.quick-qs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.quick-q{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;
+  padding:8px 14px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif}
+.quick-q:hover{color:var(--cream);border-color:rgba(201,168,76,.3)}
+
+/* ── STORY ── */
+.story-form{padding:0 16px}
+.story-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.story-opt{background:rgba(255,255,255,.04);border:2px solid transparent;border-radius:14px;
+  padding:14px 12px;cursor:pointer;transition:all .2s;text-align:center}
+.story-opt.sel{border-color:var(--gold);background:rgba(201,168,76,.1)}
+.story-opt .opt-icon{font-size:24px;margin-bottom:6px}
+.story-opt .opt-name{font-size:13px;font-weight:600;color:var(--cream)}
+.story-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;
+  padding:14px 16px;color:var(--cream);font-size:14px;line-height:1.8;min-height:80px;margin-bottom:14px;white-space:pre-wrap}
+.gen-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--em3),var(--em));
+  border:1px solid rgba(201,168,76,.3);border-radius:14px;color:var(--goldf);
+  font-size:15px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.gen-btn:hover{opacity:.9}
+.gen-btn:disabled{opacity:.5}
+
+/* ── LEARN ── */
+.learn-tabs{display:flex;gap:8px;padding:0 16px 4px;overflow-x:auto}
+.learn-tabs::-webkit-scrollbar{display:none}
+.ltab{padding:9px 18px;border-radius:20px;border:1px solid rgba(255,255,255,.1);
+  color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+  background:none;font-family:'Outfit',sans-serif;transition:all .2s}
+.ltab.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.35);color:var(--goldf)}
+
+/* Arabic letters */
+.letters-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.letter-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;
+  padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s}
+.letter-card:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.06)}
+.letter-ar{font-family:'Amiri',serif;font-size:28px;color:var(--goldp);display:block}
+.letter-en{font-size:11px;color:var(--muted);margin-top:4px}
+.letter-name{font-size:10px;color:var(--dim);margin-top:2px}
+
+/* Salah steps */
+.salah-step{display:flex;align-items:flex-start;gap:14px;padding:16px;margin:0 16px 12px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px}
+.step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--em),var(--em3));
+  border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:var(--goldf);flex-shrink:0}
+.step-title{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:4px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.step-arabic{font-family:'Amiri',serif;font-size:17px;color:var(--goldp);direction:rtl;text-align:right;margin-top:6px;display:block}
+
+/* ── KIDS ── */
+.kids-banner{margin:16px;background:linear-gradient(135deg,#0f4d28,#0a2e18);border-radius:20px;
+  padding:20px;text-align:center;border:1px solid rgba(201,168,76,.2);position:relative;overflow:hidden}
+.kids-banner h2{font-size:22px;font-weight:700;color:var(--cream);margin:8px 0 4px}
+.kids-banner p{font-size:13px;color:var(--muted)}
+.prophet-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;margin-bottom:4px}
+.prophet-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;
+  padding:16px;cursor:pointer;transition:all .2s;text-align:center}
+.prophet-card:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.06)}
+.prophet-icon{font-size:32px;margin-bottom:8px}
+.prophet-name{font-size:14px;font-weight:600;color:var(--cream)}
+.story-viewer{margin:0 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:16px;padding:20px;display:none}
+.story-viewer.open{display:block}
+.story-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.story-back{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px}
+.story-content{font-size:14px;line-height:1.85;color:var(--cream);margin-bottom:16px}
+.lesson-box{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:14px}
+.lesson-box h4{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.lesson-box p{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* Kids AI gen */
+.kids-ai-wrap{padding:0 16px;margin-top:4px}
+.kids-ai-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:12px 16px;color:var(--cream);font-family:'Outfit',sans-serif;
+  font-size:14px;outline:none;margin-bottom:10px}
+.kids-ai-input::placeholder{color:var(--muted)}
+.kids-story-out{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;
+  padding:16px;font-size:13px;line-height:1.8;color:var(--cream);margin-bottom:14px;white-space:pre-wrap;display:none}
+
+/* ── DEEN ── */
+.prayer-card{margin:0 16px 14px;background:linear-gradient(135deg,rgba(11,77,49,.5),rgba(13,31,20,.8));
+  border:1px solid rgba(201,168,76,.25);border-radius:var(--r);padding:18px;overflow:hidden}
+.prayer-location{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.prayer-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);font-size:14px}
+.prayer-row:last-child{border-bottom:none}
+.prayer-row.next-prayer{color:var(--goldf);font-weight:600}
+.prayer-row.done-prayer{color:var(--dim)}
+.prayer-badge{padding:3px 10px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);
+  border-radius:20px;font-size:10px;color:var(--gold);font-weight:700}
+
+.dhikr-main{margin:0 16px 14px;border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.dhikr-selector{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);padding:12px 14px;gap:8px}
+.dhikr-selector::-webkit-scrollbar{display:none}
+.dhikr-chip{padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);
+  font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap;background:none;
+  font-family:'Outfit',sans-serif;transition:all .2s}
+.dhikr-chip.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.35);color:var(--goldf)}
+.dhikr-display{padding:28px 20px;text-align:center}
+.dhikr-arabic{font-family:'Amiri',serif;font-size:34px;color:var(--goldp);display:block;margin-bottom:6px}
+.dhikr-trans{font-size:14px;color:var(--muted);margin-bottom:24px}
+.dhikr-counter-num{font-size:64px;font-weight:700;color:var(--cream);line-height:1;margin-bottom:8px}
+.dhikr-target{font-size:13px;color:var(--dim);margin-bottom:24px}
+.dhikr-progress{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin:0 20px 24px;overflow:hidden}
+.dhikr-fill{height:100%;background:linear-gradient(90deg,var(--em3),var(--gold));border-radius:2px;transition:width .3s}
+.dhikr-tap-btn{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--em),var(--em3));
+  border:3px solid rgba(201,168,76,.4);color:var(--goldf);font-size:30px;cursor:pointer;
+  font-family:'Outfit',sans-serif;transition:transform .1s;box-shadow:0 8px 32px rgba(11,77,49,.5)}
+.dhikr-tap-btn:active{transform:scale(.92)}
+.dhikr-reset{display:block;margin:14px auto 0;background:none;border:none;color:var(--dim);
+  font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif}
+
+.goals-wrap{padding:0 16px}
+.goal-item{display:flex;align-items:center;gap:14px;padding:14px 16px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.goal-item.done{opacity:.5}
+.goal-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--em3);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:13px}
+.goal-item.done .goal-check{background:var(--em3);border-color:var(--em3)}
+.goal-text{font-size:14px;color:var(--cream)}
+.goal-item.done .goal-text{text-decoration:line-through;color:var(--dim)}
+.add-goal-row{display:flex;gap:10px;margin-top:6px}
+.goal-input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:11px 14px;color:var(--cream);font-family:'Outfit',sans-serif;
+  font-size:14px;outline:none}
+.goal-input::placeholder{color:var(--dim)}
+.goal-add-btn{padding:11px 18px;background:var(--em3);border:none;border-radius:12px;
+  color:var(--goldf);font-size:20px;cursor:pointer}
+
+/* ── PROFILE ── */
+.profile-header{text-align:center;padding:32px 20px 20px}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--em3),var(--gold));
+  margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:36px;
+  border:3px solid rgba(201,168,76,.3)}
+.profile-name{font-size:22px;font-weight:700;color:var(--cream)}
+.profile-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;
+  border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:all .2s}
+.setting-item:hover{background:rgba(255,255,255,.03)}
+.setting-label{font-size:14px;color:var(--cream)}
+.setting-val{font-size:13px;color:var(--muted)}
+.lang-chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
+.lang-chip{padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.1);
+  color:var(--muted);font-size:13px;cursor:pointer;background:none;font-family:'Outfit',sans-serif;transition:all .2s}
+.lang-chip.active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.35);color:var(--goldf)}
+
+/* ── MODALS ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;
+  align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--night2);border:1px solid var(--border);border-radius:24px 24px 0 0;
+  width:100%;max-width:430px;max-height:80vh;overflow-y:auto;padding:24px 20px 40px}
+.modal-handle{width:40px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:20px;font-weight:700;color:var(--cream);margin-bottom:16px}
+
+/* ── UTILS ── */
+.hadith-text{font-size:14px;line-height:1.7;color:var(--cream);font-style:italic;margin-bottom:8px}
+.hadith-ref{font-size:11px;color:var(--gold);font-weight:700}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
+.loader{display:flex;justify-content:center;padding:20px}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar" id="topbar">
+    <div>
+      <div class="topbar-logo">HalalConnect</div>
+      <div class="topbar-sub" id="topbar-sub">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-btn" title="Language" onclick="navigate('profile')">🌍</div>
+    </div>
+  </div>
+
+  <!-- SCREENS -->
+  <div id="screens">
+
+    <!-- ══ HOME ══ -->
+    <div class="screen active" id="screen-home">
+      <div class="greeting-bar">
+        <div>
+          <div class="greeting-name">Assalamu Alaikum 🌙</div>
+          <div class="greeting-sub" id="today-date"></div>
+        </div>
+      </div>
+
+      <div class="section-title">✦ Today's Ayah</div>
+      <div class="card card-gold" id="daily-ayah">
+        <div style="font-size:10px;color:var(--gold);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Loading...</div>
+      </div>
+
+      <div class="section-title">✦ Today's Hadith</div>
+      <div class="card" id="daily-hadith">
+        <div class="hadith-text">Loading...</div>
+      </div>
+
+      <div class="section-title">✦ Explore</div>
+      <div class="tile-grid">
+        <div class="tile" onclick="navigate('ai')">
+          <div class="tile-icon">🤖</div>
+          <div class="tile-name">AI Assistant</div>
+          <div class="tile-desc">Ask any question</div>
+        </div>
+        <div class="tile" onclick="navigate('story')">
+          <div class="tile-icon">📖</div>
+          <div class="tile-name">Story Mode</div>
+          <div class="tile-desc">Islamic stories</div>
+        </div>
+        <div class="tile" onclick="navigate('kids')">
+          <div class="tile-icon">🌟</div>
+          <div class="tile-name">Kids Mode</div>
+          <div class="tile-desc">Prophet stories</div>
+        </div>
+        <div class="tile" onclick="navigate('learn')">
+          <div class="tile-icon">📚</div>
+          <div class="tile-name">Learn</div>
+          <div class="tile-desc">Quran & Salah</div>
+        </div>
+        <div class="tile" onclick="navigate('deen')">
+          <div class="tile-icon">🕌</div>
+          <div class="tile-name">Prayer Times</div>
+          <div class="tile-desc">& Dhikr counter</div>
+        </div>
+        <div class="tile" onclick="navigate('family')">
+          <div class="tile-icon">👨‍👩‍👧‍👦</div>
+          <div class="tile-name">Family & Life</div>
+          <div class="tile-desc">Islamic guidance</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AI CHAT ══ -->
+    <div class="screen" id="screen-ai">
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chat-messages">
+          <div class="ai-welcome">
+            <div class="ai-icon">✨</div>
+            <h3>Islamic AI Assistant</h3>
+            <p>Ask me anything about Islam — I'll answer using the Quran, Hadith, and the example of the Prophet ﷺ</p>
+            <div class="quick-qs">
+              <button class="quick-q" onclick="sendQuick('How do I deal with anxiety in Islam?')">Anxiety in Islam</button>
+              <button class="quick-q" onclick="sendQuick('What does Islam say about kindness?')">About Kindness</button>
+              <button class="quick-q" onclick="sendQuick('How to make dua properly?')">How to make Dua</button>
+              <button class="quick-q" onclick="sendQuick('What is the importance of Fajr prayer?')">Fajr prayer</button>
+              <button class="quick-q" onclick="sendQuick('How to be a good Muslim parent?')">Good parenting</button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-wrap">
+          <div class="chat-input-row">
+            <textarea class="chat-textarea" id="chat-input" rows="1" placeholder="Ask anything Islamic…" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="send-btn" onclick="sendMessage()">↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STORY ══ -->
+    <div class="screen" id="screen-story">
+      <div style="padding:16px 0 0">
+        <div class="section-title">✦ Choose a Topic</div>
+        <div class="story-form">
+          <div class="story-options" id="story-options">
+            <div class="story-opt sel" data-topic="patience" onclick="selectTopic(this)">
+              <div class="opt-icon">🌊</div>
+              <div class="opt-name">Patience (Sabr)</div>
+            </div>
+            <div class="story-opt" data-topic="gratitude" onclick="selectTopic(this)">
+              <div class="opt-icon">🌸</div>
+              <div class="opt-name">Gratitude (Shukr)</div>
+            </div>
+            <div class="story-opt" data-topic="forgiveness" onclick="selectTopic(this)">
+              <div class="opt-icon">💚</div>
+              <div class="opt-name">Forgiveness</div>
+            </div>
+            <div class="story-opt" data-topic="trust" onclick="selectTopic(this)">
+              <div class="opt-icon">🤲</div>
+              <div class="opt-name">Trust in Allah</div>
+            </div>
+            <div class="story-opt" data-topic="honesty" onclick="selectTopic(this)">
+              <div class="opt-icon">⚖️</div>
+              <div class="opt-name">Honesty</div>
+            </div>
+            <div class="story-opt" data-topic="kindness" onclick="selectTopic(this)">
+              <div class="opt-icon">❤️</div>
+              <div class="opt-name">Kindness</div>
+            </div>
+          </div>
+
+          <div class="section-title" style="margin:0 0 10px">✦ Your Story</div>
+          <div class="story-box" id="story-output">Your Islamic story will appear here. Select a topic and tap Generate.</div>
+          <button class="gen-btn" id="gen-story-btn" onclick="generateStory()">✨ Generate Story</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ KIDS ══ -->
+    <div class="screen" id="screen-kids">
+      <div class="kids-banner">
+        <div style="font-size:40px">🌟</div>
+        <h2>Islamic Kids World</h2>
+        <p>Learn about amazing Prophets! بِسْمِ اللّٰه</p>
+      </div>
+
+      <div class="section-title">✦ Prophet Stories</div>
+      <div class="prophet-cards" id="prophet-cards">
+        <div class="prophet-card" onclick="showProphetStory('ibrahim')">
+          <div class="prophet-icon">🔥</div>
+          <div class="prophet-name">Prophet Ibrahim ﷺ</div>
+        </div>
+        <div class="prophet-card" onclick="showProphetStory('musa')">
+          <div class="prophet-icon">🌊</div>
+          <div class="prophet-name">Prophet Musa ﷺ</div>
+        </div>
+        <div class="prophet-card" onclick="showProphetStory('yunus')">
+          <div class="prophet-icon">🐋</div>
+          <div class="prophet-name">Prophet Yunus ﷺ</div>
+        </div>
+        <div class="prophet-card" onclick="showProphetStory('yusuf')">
+          <div class="prophet-icon">⭐</div>
+          <div class="prophet-name">Prophet Yusuf ﷺ</div>
+        </div>
+      </div>
+
+      <div class="story-viewer" id="story-viewer">
+        <div class="story-header">
+          <div style="font-size:18px;font-weight:700;color:var(--cream)" id="story-viewer-title"></div>
+          <button class="story-back" onclick="closeProphetStory()">✕</button>
+        </div>
+        <div class="story-content" id="story-viewer-content"></div>
+        <div class="lesson-box">
+          <h4>🌟 Lesson for Us</h4>
+          <p id="story-viewer-lesson"></p>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:16px">✦ AI Kids Story</div>
+      <div class="kids-ai-wrap">
+        <input class="kids-ai-input" id="kids-topic-input" placeholder="Type a value to learn about (e.g. sharing, being kind)..." />
+        <button class="gen-btn" id="kids-gen-btn" onclick="generateKidsStory()" style="margin-bottom:14px">🌈 Generate Kids Story</button>
+        <div class="kids-story-out" id="kids-story-out"></div>
+      </div>
+    </div>
+
+    <!-- ══ LEARN ══ -->
+    <div class="screen" id="screen-learn">
+      <div style="padding:16px 0 8px">
+        <div class="learn-tabs">
+          <button class="ltab active" onclick="switchLearnTab('quran',this)">📖 Quran</button>
+          <button class="ltab" onclick="switchLearnTab('salah',this)">🙏 Salah</button>
+          <button class="ltab" onclick="switchLearnTab('wudu',this)">💧 Wudu</button>
+        </div>
+      </div>
+
+      <div id="learn-quran">
+        <div class="section-title">✦ Arabic Alphabet</div>
+        <div class="letters-grid" id="letters-grid"></div>
+        <div class="section-title" style="margin-top:20px">✦ Beginner Tips</div>
+        <div class="card">
+          <div style="font-size:14px;color:var(--muted);line-height:1.7">
+            <p style="margin-bottom:10px">🔤 <strong style="color:var(--cream)">Start with Alif</strong> — Arabic is read right to left. Each letter can change shape based on its position in a word.</p>
+            <p style="margin-bottom:10px">🎵 <strong style="color:var(--cream)">Tajweed Rules</strong> — Tajweed means reciting the Quran with proper pronunciation. Start slowly and listen to reciters like Sheikh Al-Ghamdi.</p>
+            <p>📿 <strong style="color:var(--cream)">Practice Daily</strong> — Even 5 minutes a day will build your skills. The Prophet ﷺ said: "The best of you are those who learn the Quran and teach it."</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="learn-salah" style="display:none">
+        <div class="section-title">✦ How to Pray Salah</div>
+        <div id="salah-steps"></div>
+      </div>
+
+      <div id="learn-wudu" style="display:none">
+        <div class="section-title">✦ How to Make Wudu</div>
+        <div id="wudu-steps"></div>
+      </div>
+    </div>
+
+    <!-- ══ DEEN ══ -->
+    <div class="screen" id="screen-deen">
+      <div class="section-title">🕌 Prayer Times</div>
+      <div class="prayer-card" id="prayer-times-card">
+        <div class="prayer-location" id="prayer-location">📍 Getting your location...</div>
+        <div class="empty-state" style="padding:20px">
+          <div style="font-size:30px;margin-bottom:10px">🕌</div>
+          <div>Fetching prayer times...</div>
+        </div>
+      </div>
+
+      <div class="section-title">📿 Dhikr Counter</div>
+      <div class="dhikr-main">
+        <div class="dhikr-selector" id="dhikr-selector">
+          <button class="dhikr-chip active" onclick="selectDhikr(0,this)">SubhanAllah</button>
+          <button class="dhikr-chip" onclick="selectDhikr(1,this)">Alhamdulillah</button>
+          <button class="dhikr-chip" onclick="selectDhikr(2,this)">Allahu Akbar</button>
+          <button class="dhikr-chip" onclick="selectDhikr(3,this)">Astaghfirullah</button>
+          <button class="dhikr-chip" onclick="selectDhikr(4,this)">La ilaha illallah</button>
+        </div>
+        <div class="dhikr-display">
+          <span class="dhikr-arabic" id="dhikr-arabic">سُبْحَانَ اللَّهِ</span>
+          <div class="dhikr-trans" id="dhikr-trans">Glory be to Allah</div>
+          <div class="dhikr-counter-num" id="dhikr-num">0</div>
+          <div class="dhikr-target" id="dhikr-target">Target: 33</div>
+          <div class="dhikr-progress"><div class="dhikr-fill" id="dhikr-fill" style="width:0%"></div></div>
+          <button class="dhikr-tap-btn" onclick="tapDhikr()">﷽</button>
+          <button class="dhikr-reset" onclick="resetDhikr()">Reset counter</button>
+        </div>
+      </div>
+
+      <div class="section-title">🎯 Deen Goals</div>
+      <div class="goals-wrap">
+        <div id="goals-list"></div>
+        <div class="add-goal-row">
+          <input class="goal-input" id="new-goal-input" placeholder="Add a goal…" onkeydown="if(event.key==='Enter')addGoal()"/>
+          <button class="goal-add-btn" onclick="addGoal()">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FAMILY ══ -->
+    <div class="screen" id="screen-family">
+      <div style="padding:16px 0 0">
+        <div class="section-title">✦ Family & Life Guidance</div>
+        <div class="card card-gold">
+          <div class="ayah-arabic">وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا</div>
+          <div class="ayah-trans">"And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquility with them."</div>
+          <div class="ayah-ref">Surah Ar-Rum 30:21</div>
+        </div>
+
+        <div class="section-title">✦ Ask About Family Life</div>
+        <div style="padding:0 16px">
+          <div class="story-options" id="family-topics">
+            <div class="story-opt sel" data-ftopic="marriage" onclick="selectFamilyTopic(this)">
+              <div class="opt-icon">💍</div>
+              <div class="opt-name">Marriage</div>
+            </div>
+            <div class="story-opt" data-ftopic="parenting" onclick="selectFamilyTopic(this)">
+              <div class="opt-icon">👶</div>
+              <div class="opt-name">Parenting</div>
+            </div>
+            <div class="story-opt" data-ftopic="husband" onclick="selectFamilyTopic(this)">
+              <div class="opt-icon">👨</div>
+              <div class="opt-name">Husband's Role</div>
+            </div>
+            <div class="story-opt" data-ftopic="wife" onclick="selectFamilyTopic(this)">
+              <div class="opt-icon">👩</div>
+              <div class="opt-name">Wife's Role</div>
+            </div>
+            <div class="story-opt" data-ftopic="parents" onclick="selectFamilyTopic(this)">
+              <div class="opt-icon">🤲</div>
+              <div class="opt-name">Respecting Parents</div>
+            </div>
+            <div class="story-opt" data-ftopic="character" onclick="selectFamilyTopic(this)">
+              <div class="opt-icon">💎</div>
+              <div class="opt-name">Good Character</div>
+            </div>
+          </div>
+          <div class="story-box" id="family-output">Choose a topic and tap Get Guidance to receive Islamic advice based on the Quran and Sunnah.</div>
+          <button class="gen-btn" id="family-btn" onclick="getFamilyGuidance()">🌿 Get Islamic Guidance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROFILE ══ -->
+    <div class="screen" id="screen-profile">
+      <div class="profile-header">
+        <div class="profile-avatar">☪️</div>
+        <div class="profile-name">Muslim User</div>
+        <div class="profile-sub">May Allah bless your journey 🤲</div>
+      </div>
+
+      <div class="section-title">🌍 Language</div>
+      <div class="lang-chips" id="lang-chips">
+        <button class="lang-chip active" onclick="setLang('en',this)">🇬🇧 English</button>
+        <button class="lang-chip" onclick="setLang('ur',this)">🇵🇰 Urdu</button>
+        <button class="lang-chip" onclick="setLang('ar',this)">🇸🇦 Arabic</button>
+        <button class="lang-chip" onclick="setLang('hi',this)">🇮🇳 Hindi</button>
+        <button class="lang-chip" onclick="setLang('bn',this)">🇧🇩 Bengali</button>
+        <button class="lang-chip" onclick="setLang('tr',this)">🇹🇷 Turkish</button>
+        <button class="lang-chip" onclick="setLang('id',this)">🇮🇩 Indonesian</button>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">⚙️ Settings</div>
+      <div class="card">
+        <div class="setting-item" style="border-bottom:1px solid rgba(255,255,255,.06);padding:0 0 14px;margin-bottom:14px">
+          <span class="setting-label">AI Mode</span>
+          <span class="setting-val">Islamic Scholar ✓</span>
+        </div>
+        <div class="setting-item" style="border-bottom:1px solid rgba(255,255,255,.06);padding:0 0 14px;margin-bottom:14px">
+          <span class="setting-label">Madhab</span>
+          <span class="setting-val" id="madhab-val">Hanafi</span>
+        </div>
+        <div class="setting-item" style="padding:0">
+          <span class="setting-label">Calculation Method</span>
+          <span class="setting-val">Muslim World League</span>
+        </div>
+      </div>
+
+      <div class="card" style="text-align:center;margin-top:4px">
+        <div style="font-family:'Amiri',serif;font-size:22px;color:var(--goldp);margin-bottom:8px">وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ</div>
+        <div style="font-size:13px;color:var(--muted)">"My success is only through Allah" — Surah Hud 11:88</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:16px">HalalConnect v1.0 · Built for the Ummah</div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" onclick="navigate('home')"><span class="icon">🏠</span><span class="label">Home</span></button>
+    <button class="nav-btn" onclick="navigate('learn')"><span class="icon">📚</span><span class="label">Learn</span></button>
+    <button class="nav-btn" onclick="navigate('ai')"><span class="icon">✨</span><span class="label">AI</span></button>
+    <button class="nav-btn" onclick="navigate('deen')"><span class="icon">🕌</span><span class="label">Deen</span></button>
+    <button class="nav-btn" onclick="navigate('profile')"><span class="icon">👤</span><span class="label">Profile</span></button>
+  </nav>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// ISLAMIC DATA
+// ══════════════════════════════════════════
+
+const QURAN_VERSES = [
+  { arabic:'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ', trans:'"Whoever relies upon Allah — then He is sufficient for him."', ref:'Surah At-Talaq 65:3' },
+  { arabic:'إِنَّ مَعَ الْعُسْرِ يُسْرًا', trans:'"Indeed, with hardship will be ease."', ref:'Surah Ash-Sharh 94:6' },
+  { arabic:'وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ', trans:'"Do not weaken and do not grieve, for you will be superior if you are true believers."', ref:'Surah Al-Imran 3:139' },
+  { arabic:'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً', trans:'"Our Lord, give us good in this world and good in the Hereafter."', ref:'Surah Al-Baqarah 2:201' },
+  { arabic:'وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ', trans:'"Seek help through patience and prayer."', ref:'Surah Al-Baqarah 2:45' },
+  { arabic:'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا', trans:'"For indeed, with hardship will be ease."', ref:'Surah Ash-Sharh 94:5' },
+  { arabic:'وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ', trans:'"And He is with you wherever you are."', ref:'Surah Al-Hadid 57:4' },
+  { arabic:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ', trans:'"Verily, in the remembrance of Allah do hearts find rest."', ref:'Surah Ar-Ra\'d 13:28' },
+  { arabic:'وَبَشِّرِ الصَّابِرِينَ', trans:'"And give good tidings to the patient."', ref:'Surah Al-Baqarah 2:155' },
+  { arabic:'إِنَّ اللَّهَ مَعَ الصَّابِرِينَ', trans:'"Indeed, Allah is with the patient."', ref:'Surah Al-Baqarah 2:153' },
+  { arabic:'وَمَا أُوتِيتُم مِّنَ الْعِلْمِ إِلَّا قَلِيلًا', trans:'"And you have been given of knowledge only a little."', ref:'Surah Al-Isra 17:85' },
+  { arabic:'رَبِّ زِدْنِي عِلْمًا', trans:'"My Lord, increase me in knowledge."', ref:'Surah Ta-Ha 20:114' },
+  { arabic:'وَقُل رَّبِّ اغْفِرْ وَارْحَمْ وَأَنتَ خَيْرُ الرَّاحِمِينَ', trans:'"And say: My Lord, forgive and have mercy, and You are the best of the merciful."', ref:'Surah Al-Mu\'minun 23:118' },
+  { arabic:'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ', trans:'"Allah is sufficient for us, and He is the best Disposer of affairs."', ref:'Surah Al-Imran 3:173' },
+];
+
+const HADITHS = [
+  { text:'"The strong man is not the one who can overpower others. The strong man is the one who controls himself when he is angry."', ref:'Sahih Bukhari' },
+  { text:'"The best of you are those who are best to their families."', ref:'Sunan Tirmidhi' },
+  { text:'"Kindness is a mark of faith, and whoever has no kindness has no faith."', ref:'Sahih Muslim' },
+  { text:'"Do not be people without minds of your own, saying that if others treat you well you will treat them well, and that if they do wrong you will do wrong. Instead, accustom yourselves to do good if people do good and not to do wrong if they do evil."', ref:'Sunan Tirmidhi' },
+  { text:'"The most beloved deeds to Allah are those done consistently, even if they are small."', ref:'Sahih Bukhari' },
+  { text:'"A Muslim is the one from whose tongue and hands other Muslims are safe."', ref:'Sahih Bukhari' },
+  { text:'"Whoever believes in Allah and the Last Day should speak good or keep silent."', ref:'Sahih Bukhari' },
+  { text:'"Make things easy and do not make them difficult. Cheer people up and do not drive them away."', ref:'Sahih Bukhari' },
+  { text:'"The best among you are those who have the best character."', ref:'Sahih Bukhari' },
+  { text:'"Seek knowledge from the cradle to the grave."', ref:'Ibn Abd Al-Barr' },
+];
+
+const ARABIC_LETTERS = [
+  {ar:'ا',en:'A',name:'Alif'},{ar:'ب',en:'B',name:'Ba'},{ar:'ت',en:'T',name:'Ta'},{ar:'ث',en:'Th',name:'Tha'},
+  {ar:'ج',en:'J',name:'Jim'},{ar:'ح',en:'H',name:'Ha'},{ar:'خ',en:'Kh',name:'Kha'},{ar:'د',en:'D',name:'Dal'},
+  {ar:'ذ',en:'Dh',name:'Dhal'},{ar:'ر',en:'R',name:'Ra'},{ar:'ز',en:'Z',name:'Zay'},{ar:'س',en:'S',name:'Sin'},
+  {ar:'ش',en:'Sh',name:'Shin'},{ar:'ص',en:'S',name:'Sad'},{ar:'ض',en:'D',name:'Dad'},{ar:'ط',en:'T',name:'Ta'},
+  {ar:'ظ',en:'Z',name:'Za'},{ar:'ع',en:'\'',name:'Ayn'},{ar:'غ',en:'Gh',name:'Ghayn'},{ar:'ف',en:'F',name:'Fa'},
+  {ar:'ق',en:'Q',name:'Qaf'},{ar:'ك',en:'K',name:'Kaf'},{ar:'ل',en:'L',name:'Lam'},{ar:'م',en:'M',name:'Mim'},
+  {ar:'ن',en:'N',name:'Nun'},{ar:'ه',en:'H',name:'Ha'},{ar:'و',en:'W',name:'Waw'},{ar:'ي',en:'Y',name:'Ya'},
+];
+
+const SALAH_STEPS = [
+  { title:'Make intention (Niyyah)', desc:'In your heart, intend to pray the specific prayer (e.g. Fajr, Dhuhr). Say to yourself: "I intend to pray Fajr, 2 rakats, for the sake of Allah."', arabic:'' },
+  { title:'Say Takbir al-Ihram', desc:'Raise both hands to your earlobes and say:', arabic:'اللَّهُ أَكْبَرُ — Allahu Akbar (Allah is the Greatest)' },
+  { title:'Recite Opening Dua & Al-Fatiha', desc:'Fold your right hand over your left on your chest. Recite Surah Al-Fatiha (the opening chapter of the Quran). Then recite another short Surah.', arabic:'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ' },
+  { title:'Bow (Ruku)', desc:'Bow with your back parallel to the ground, hands on knees. Glorify Allah 3 times:', arabic:'سُبْحَانَ رَبِّيَ الْعَظِيمِ — Subhana Rabbiyal Azeem' },
+  { title:'Stand up from Ruku', desc:'Rise and say:', arabic:'سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ — Sami Allahu Liman Hamidah' },
+  { title:'Prostrate (Sujud)', desc:'Go down to prostration with 7 body parts touching the ground: forehead+nose, both palms, both knees, toes of both feet. Say 3 times:', arabic:'سُبْحَانَ رَبِّيَ الْأَعْلَى — Subhana Rabbiyal A\'la' },
+  { title:'Sit between prostrations', desc:'Sit briefly and say:', arabic:'رَبِّ اغْفِرْ لِي — Rabbi Ighfir Li (Lord forgive me)' },
+  { title:'Second prostration', desc:'Perform a second Sujud exactly like the first, saying Subhana Rabbiyal A\'la 3 times.', arabic:'سُبْحَانَ رَبِّيَ الْأَعْلَى' },
+  { title:'Tashahhud (final sitting)', desc:'After completing the required rakats, sit and recite the Tashahhud. End by turning your head right then left saying:', arabic:'السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ — Assalamu Alaykum wa Rahmatullah' },
+];
+
+const WUDU_STEPS = [
+  { title:'Make Niyyah (intention)', desc:'In your heart, intend to perform Wudu for prayer. Say: Bismillah.', arabic:'بِسْمِ اللَّهِ — Bismillah' },
+  { title:'Wash both hands', desc:'Wash both hands up to and including the wrists 3 times. Make sure water reaches between the fingers.', arabic:'' },
+  { title:'Rinse the mouth', desc:'Take water in your right hand and rinse your mouth 3 times thoroughly.', arabic:'' },
+  { title:'Sniff water into nose', desc:'Sniff water into your nostrils and blow it out 3 times using your left hand.', arabic:'' },
+  { title:'Wash the face', desc:'Wash your entire face 3 times — from hairline to chin and from ear to ear.', arabic:'' },
+  { title:'Wash arms to elbows', desc:'Wash the right arm from fingertips to elbow (inclusive) 3 times, then the left arm.', arabic:'' },
+  { title:'Wipe the head', desc:'Wipe your entire head once with wet hands, from front to back and back to front.', arabic:'' },
+  { title:'Wipe the ears', desc:'Wipe the inside of ears with index fingers and outside with thumbs, once.', arabic:'' },
+  { title:'Wash the feet', desc:'Wash the right foot up to and including the ankles 3 times (including between toes), then the left foot.', arabic:'' },
+  { title:'Say the dua', desc:'After Wudu, recite:', arabic:'أَشْهَدُ أَن لَّا إِلَٰهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ' },
+];
+
+const DHIKRS = [
+  { arabic:'سُبْحَانَ اللَّهِ', trans:'Glory be to Allah', target:33 },
+  { arabic:'الْحَمْدُ لِلَّهِ', trans:'All praise is due to Allah', target:33 },
+  { arabic:'اللَّهُ أَكْبَرُ', trans:'Allah is the Greatest', target:33 },
+  { arabic:'أَسْتَغْفِرُ اللَّهَ', trans:'I seek forgiveness from Allah', target:100 },
+  { arabic:'لَا إِلَٰهَ إِلَّا اللَّهُ', trans:'There is no god but Allah', target:100 },
+];
+
+const PROPHET_STORIES = {
+  ibrahim: {
+    title:'Prophet Ibrahim ﷺ — The Friend of Allah',
+    content:`Long ago, there lived a brave young man named Ibrahim (Abraham). He lived in a city where everyone worshipped statues made of stone and wood. Ibrahim looked at these statues and thought: "How can these be our gods? They cannot speak, eat, or help anyone!"
+
+Ibrahim tried to tell his people the truth. He said, "There is only ONE God — Allah, who created the sun, moon, stars, and all of us!" But his people and even his father refused to listen.
+
+One day, when everyone left for a festival, Ibrahim stayed behind. He smashed all the statues except the biggest one, and put his axe on that one. When the people returned and asked who had done this, Ibrahim said, "Ask the big statue — he has an axe!"
+
+The people were angry and threw Ibrahim into a huge fire! But Allah commanded the fire: "Be cool and safe for Ibrahim." Allah protected His friend, and Ibrahim walked out of the fire without a single burn!
+
+Later, Allah tested Ibrahim again — this time with his beloved son Ismail. Ibrahim followed Allah's command with full trust. Allah was so pleased with Ibrahim's obedience that He replaced Ismail with a ram and saved them both.
+
+Ibrahim spent his life calling people to worship only Allah. He and his son Ismail built the Ka'bah in Makkah — the house we face in our prayers today.`,
+    lesson: "Ibrahim ﷺ taught us that we should trust Allah completely, even when things are hard. When we have full faith (Tawakkul), Allah will always protect us and reward our obedience. 🤲"
+  },
+  musa: {
+    title:'Prophet Musa ﷺ — The Bold Messenger',
+    content:`Prophet Musa (Moses) was born at a very dangerous time. The evil King Pharaoh was so afraid of a new prophet that he ordered all baby boys to be killed. Musa's mother was frightened, but Allah told her in her heart: "Put your baby in a basket and set it in the river. Don't be afraid — We will return him to you."
+
+So baby Musa floated down the Nile River in a little basket. Amazingly, the basket floated right to the palace of Pharaoh! Pharaoh's wife found the baby and loved him immediately. She said, "Don't harm him — he may be useful to us, or we may adopt him." Allah had a plan all along!
+
+Musa grew up in the palace, not knowing he was from the people Pharaoh was oppressing. When Musa was grown, Allah spoke to him from a burning bush: "O Musa! I am Allah, the Lord of the worlds. Go to Pharaoh — he has gone too far."
+
+Musa was afraid, but Allah gave him two miracles: his staff could turn into a snake, and his hand could shine like the sun. Musa went to Pharaoh and said, "Let my people go!" Pharaoh laughed and refused.
+
+Allah sent 9 plagues to warn Pharaoh. Still Pharaoh refused. Finally, Allah told Musa to lead his people out of Egypt. Pharaoh chased them to the sea. Everyone was terrified! Musa trusted Allah and struck his staff on the water. The sea split open into a dry path! Musa and his people walked across safely. When Pharaoh followed, the water closed over him.`,
+    lesson: "Musa ﷺ showed us that when we trust Allah and are brave for what is right, Allah will open the way — even through the sea! No matter how powerful our enemy seems, Allah is more powerful. 💪"
+  },
+  yunus: {
+    title:'Prophet Yunus ﷺ — Never Give Up on Allah',
+    content:`Prophet Yunus (Jonah) was sent to the people of Nineveh. He preached to them for a long time, asking them to worship only Allah. But they refused and refused. Yunus became very frustrated and sad.
+
+One day, Yunus left without waiting for Allah's permission. He boarded a ship to sail away. A terrible storm hit the ship! The sailors were frightened and decided they must throw someone overboard to lighten the ship — they drew lots and the lot fell to Yunus.
+
+Yunus was thrown into the dark, stormy sea. Immediately, a huge whale swallowed him! Can you imagine being inside a whale?
+
+In the total darkness inside the whale's belly, deep in the ocean, Yunus remembered Allah. He made dua with all his heart:
+
+"لَّا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ"
+
+"There is no god but You, Glory be to You, Indeed I have been of the wrongdoers."
+
+Allah heard his dua! Allah commanded the whale to release Yunus on the shore. Yunus emerged tired and sick, but Allah made a special gourd plant grow over him to give him shade and heal him.
+
+Yunus returned to his people. Amazingly, they had already turned back to Allah! His people were saved — 100,000 people believed.`,
+    lesson: "Yunus ﷺ teaches us that no matter where we are or what mistakes we've made, we can always turn back to Allah. Never feel like you are too far from Allah's mercy — keep making dua! 🐋"
+  },
+  yusuf: {
+    title:'Prophet Yusuf ﷺ — Beauty, Patience & Forgiveness',
+    content:`Prophet Yusuf (Joseph) was the most handsome young man of his time, and deeply loved by his father Prophet Ya'qub. One day, young Yusuf told his father: "Father, I saw eleven stars and the sun and the moon bowing down to me." His father said, "This is a great dream — you will be a prophet."
+
+Yusuf's brothers were jealous of how much their father loved Yusuf. They made a plan. One day, they took young Yusuf into the wilderness and threw him into a deep, dark well! They went home and told their father a wolf had eaten Yusuf. Poor Ya'qub cried so much that he lost his sight from weeping.
+
+A caravan came by and found Yusuf in the well. They sold him as a slave in Egypt. Yusuf was bought by a nobleman. Though Yusuf was a slave, he worked hard and was trustworthy. His master trusted him completely.
+
+Then Yusuf faced another test — he was falsely accused and thrown in prison! Even in prison, Yusuf remained patient, helpful, and remembered Allah always. He interpreted people's dreams with Allah's gift.
+
+Years passed. The King of Egypt had a dream that no one could interpret. The King sent for Yusuf. Yusuf correctly interpreted the dream and advised the King to store food for seven years to survive a coming famine. The King was so impressed he made Yusuf his most trusted minister!
+
+During the famine, Yusuf's brothers came to Egypt seeking food. They didn't recognize their brother. Yusuf eventually revealed himself. His brothers were ashamed and scared. But Yusuf — now a powerful man — said: "No blame upon you today. May Allah forgive you."
+
+His family reunited, and his father's sight returned. Yusuf's dream had come true.`,
+    lesson: "Yusuf ﷺ teaches us to be patient through hardship, to stay honest even when no one is watching, and to forgive those who wronged us. Everything painful in life can lead to something beautiful when we trust Allah's plan. ⭐"
+  }
+};
+
+const LANG_INSTRUCTIONS = {
+  en:'Respond in English.',
+  ur:'جواب اردو میں دیں۔',
+  ar:'أجب باللغة العربية.',
+  hi:'हिंदी में उत्तर दें।',
+  bn:'বাংলায় উত্তর দিন।',
+  tr:'Türkçe cevap ver.',
+  id:'Jawab dalam Bahasa Indonesia.',
+};
+
+// ══════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════
+const STATE = {
+  currentScreen: 'home',
+  chatHistory: [],
+  selectedTopic: 'patience',
+  selectedFamilyTopic: 'marriage',
+  dhikrIdx: 0,
+  dhikrCount: 0,
+  goals: [
+    { text:'Read 1 page of Quran', done:false },
+    { text:'Pray all 5 prayers on time', done:false },
+    { text:'Morning Adhkar', done:false },
+    { text:'Give Sadaqah today', done:false },
+  ],
+  lang: 'en',
+  learnTab: 'quran',
+  isGenerating: false,
+};
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+
+  const navMap = {home:0,learn:1,ai:2,deen:3,profile:4,story:-1,kids:-1,family:-1};
+  const navIdx = navMap[screen];
+  if(navIdx>=0) document.querySelectorAll('.nav-btn')[navIdx].classList.add('active');
+
+  STATE.currentScreen = screen;
+  document.getElementById('screens').scrollTop = 0;
+
+  const subtitles = {
+    home:'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+    ai:'Islamic AI Assistant',
+    story:'Story Generator',
+    kids:'Islamic Kids World 🌟',
+    learn:'Learn & Grow',
+    deen:'Prayer Times & Dhikr',
+    family:'Family & Life',
+    profile:'Profile & Settings'
+  };
+  document.getElementById('topbar-sub').textContent = subtitles[screen] || '';
+}
+
+// ══════════════════════════════════════════
+// CLAUDE API
+// ══════════════════════════════════════════
+async function callClaude(messages, system) {
+  const res = await fetch('https://winter-dew-45b7.shailshaikhq5.workers.dev', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      system: system,
+      messages: messages
+    })
+  });
+  const data = await res.json();
+  return data.content?.[0]?.text || 'I apologize, there was an error. Please try again.';
+}
+
+const ISLAMIC_SYSTEM = `You are an Islamic AI assistant for the HalalConnect app. You are knowledgeable, warm, and respectful.
+
+RULES:
+1. Always answer based on the Quran and authentic Hadith (Bukhari, Muslim, Tirmidhi, Abu Dawud, Nasa'i, Ibn Majah)
+2. When relevant, include: an Arabic Quranic verse or Hadith (short), its English translation, and the source reference
+3. Be compassionate and encouraging — never harsh or judgmental
+4. For controversial fiqh matters, mention that scholars differ and recommend consulting a local imam
+5. Keep responses focused and practical
+6. Format: Use clear paragraphs. When quoting Quran/Hadith, put the Arabic on its own line followed by translation in quotes, then the reference in parentheses
+7. End with a practical tip or dua when relevant`;
+
+// ── CHAT ──
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text || STATE.isGenerating) return;
+
+  // Remove welcome message
+  const welcome = document.querySelector('.ai-welcome');
+  if(welcome) welcome.remove();
+
+  input.value = '';
+  input.style.height = 'auto';
+  STATE.isGenerating = true;
+  document.getElementById('send-btn').disabled = true;
+
+  addMessage(text, 'user');
+  STATE.chatHistory.push({role:'user', content:text});
+
+  const typingId = addTyping();
+
+  try {
+    const langNote = LANG_INSTRUCTIONS[STATE.lang] || '';
+    const system = ISLAMIC_SYSTEM + '\n\n' + langNote;
+    const reply = await callClaude(STATE.chatHistory, system);
+    removeTyping(typingId);
+    addMessage(reply, 'ai');
+    STATE.chatHistory.push({role:'assistant', content:reply});
+  } catch(e) {
+    removeTyping(typingId);
+    addMessage('Sorry, there was an error connecting to the AI. Please check your connection and try again.', 'ai');
+  }
+
+  STATE.isGenerating = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+function addMessage(text, role) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${role}`;
+  div.innerHTML = `<div class="msg-text">${formatAIText(text)}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function formatAIText(text) {
+  // Detect Arabic characters and wrap them
+  const arabicRegex = /[\u0600-\u06FF\u0750-\u077F]+[\s\u0600-\u06FF\u0750-\u077F]*/g;
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n\n/g,'</p><p style="margin-top:10px">').replace(/\n/g,'<br/>')
+    .replace(/([\u0600-\u06FF][^\n<]*)/g, '<span class="msg-arabic">$1</span>');
+}
+
+function addTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const id = 'typing-'+Date.now();
+  const div = document.createElement('div');
+  div.id = id;
+  div.className = 'msg msg-ai';
+  div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if(el) el.remove();
+}
+
+function handleChatKey(e) {
+  if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100)+'px';
+}
+
+function sendQuick(q) {
+  document.getElementById('chat-input').value = q;
+  sendMessage();
+}
+
+// ── STORY ──
+function selectTopic(el) {
+  document.querySelectorAll('.story-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  STATE.selectedTopic = el.dataset.topic;
+}
+
+async function generateStory() {
+  if(STATE.isGenerating) return;
+  STATE.isGenerating = true;
+  const btn = document.getElementById('gen-story-btn');
+  const box = document.getElementById('story-output');
+  btn.disabled = true;
+  btn.textContent = '✨ Generating...';
+  box.textContent = 'Generating your Islamic story...';
+
+  const topics = {
+    patience:'Sabr (Patience)',
+    gratitude:'Shukr (Gratitude)',
+    forgiveness:'Forgiveness (Afw)',
+    trust:'Tawakkul (Trust in Allah)',
+    honesty:'Honesty and Truthfulness',
+    kindness:'Kindness and Compassion'
+  };
+
+  const prompt = `Generate an Islamic short story (about 250-300 words) about the theme of ${topics[STATE.selectedTopic]}.
+
+The story should:
+1. Have a relatable modern character facing a real life situation
+2. Show how Islamic values guide them
+3. Include ONE relevant Quranic verse or Hadith with translation and reference
+4. End with a clear moral lesson and reflection question
+
+Format: Write the story in flowing paragraphs. Put the Quran/Hadith reference in [brackets]. End with "Lesson:" and "Reflect:" sections.
+
+${LANG_INSTRUCTIONS[STATE.lang]||''}`;
+
+  try {
+    const reply = await callClaude([{role:'user',content:prompt}],
+      'You are an Islamic storyteller who creates meaningful, relatable stories that teach Islamic values using Quran and Hadith. Keep language warm and accessible.');
+    box.textContent = reply;
+  } catch(e) {
+    box.textContent = 'Error generating story. Please try again.';
+  }
+
+  STATE.isGenerating = false;
+  btn.disabled = false;
+  btn.textContent = '✨ Generate Story';
+}
+
+// ── KIDS ──
+function showProphetStory(prophet) {
+  const story = PROPHET_STORIES[prophet];
+  if(!story) return;
+  document.getElementById('prophet-cards').style.display='none';
+  const viewer = document.getElementById('story-viewer');
+  viewer.classList.add('open');
+  document.getElementById('story-viewer-title').textContent = story.title;
+  document.getElementById('story-viewer-content').textContent = story.content;
+  document.getElementById('story-viewer-lesson').textContent = story.lesson;
+}
+
+function closeProphetStory() {
+  document.getElementById('prophet-cards').style.display='grid';
+  document.getElementById('story-viewer').classList.remove('open');
+}
+
+async function generateKidsStory() {
+  if(STATE.isGenerating) return;
+  const topic = document.getElementById('kids-topic-input').value.trim();
+  if(!topic) { document.getElementById('kids-topic-input').style.borderColor='var(--gold)'; return; }
+
+  STATE.isGenerating = true;
+  const btn = document.getElementById('kids-gen-btn');
+  const out = document.getElementById('kids-story-out');
+  btn.disabled = true;
+  btn.textContent = '🌈 Generating...';
+  out.style.display = 'block';
+  out.textContent = 'Creating your kids story...';
+
+  const prompt = `Create a very simple, fun Islamic story for children (ages 5-10) about "${topic}".
+
+Rules:
+- Use simple words a child can understand
+- Keep it short (150-200 words)
+- Include a brief lesson from Islamic teachings
+- Use emojis to make it fun 🌟
+- End with a fun question the child can answer
+
+${LANG_INSTRUCTIONS[STATE.lang]||''}`;
+
+  try {
+    const reply = await callClaude([{role:'user',content:prompt}],
+      'You are a friendly Islamic teacher for children. Use very simple language, fun emojis, and short sentences. Always tie lessons to Islamic values gently.');
+    out.textContent = reply;
+  } catch(e) {
+    out.textContent = 'Error generating story. Please try again.';
+  }
+
+  STATE.isGenerating = false;
+  btn.disabled = false;
+  btn.textContent = '🌈 Generate Kids Story';
+}
+
+// ── FAMILY ──
+function selectFamilyTopic(el) {
+  document.querySelectorAll('#family-topics .story-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  STATE.selectedFamilyTopic = el.dataset.ftopic;
+}
+
+async function getFamilyGuidance() {
+  if(STATE.isGenerating) return;
+  STATE.isGenerating = true;
+  const btn = document.getElementById('family-btn');
+  const box = document.getElementById('family-output');
+  btn.disabled = true;
+  btn.textContent = '🌿 Loading guidance...';
+  box.textContent = 'Fetching Islamic guidance...';
+
+  const topics = {
+    marriage:'Islamic marriage, rights and responsibilities of spouses, maintaining a loving marriage',
+    parenting:'Islamic parenting, raising righteous children, balancing love and discipline',
+    husband:'The role and responsibilities of a husband in Islam',
+    wife:'The role and responsibilities of a wife in Islam',
+    parents:'Respecting parents (Birr al-Walidayn) in Islam, honoring mother and father',
+    character:'Building good Islamic character (Akhlaq), following the example of Prophet Muhammad ﷺ'
+  };
+
+  const prompt = `Provide practical Islamic guidance on: ${topics[STATE.selectedFamilyTopic]}
+
+Include:
+1. The Islamic perspective based on Quran and Hadith
+2. ONE Quranic verse and ONE Hadith (with Arabic, translation, reference)
+3. 3-4 practical tips for modern Muslims
+4. Words of encouragement
+
+Keep it warm, practical, and around 250 words. ${LANG_INSTRUCTIONS[STATE.lang]||''}`;
+
+  try {
+    const reply = await callClaude([{role:'user',content:prompt}],
+      'You are a wise Islamic family counselor. Provide guidance based on the Quran, Hadith, and Islamic scholarship. Be warm, practical, and encouraging. Always emphasize mercy and understanding.');
+    box.textContent = reply;
+  } catch(e) {
+    box.textContent = 'Error loading guidance. Please try again.';
+  }
+
+  STATE.isGenerating = false;
+  btn.disabled = false;
+  btn.textContent = '🌿 Get Islamic Guidance';
+}
+
+// ══════════════════════════════════════════
+// LEARN TAB
+// ══════════════════════════════════════════
+function switchLearnTab(tab, el) {
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['quran','salah','wudu'].forEach(t=>{
+    document.getElementById('learn-'+t).style.display = (t===tab)?'block':'none';
+  });
+}
+
+function renderLetters() {
+  const grid = document.getElementById('letters-grid');
+  if(!grid) return;
+  grid.innerHTML = ARABIC_LETTERS.map(l=>`
+    <div class="letter-card" title="${l.name}">
+      <span class="letter-ar">${l.ar}</span>
+      <div class="letter-en">${l.en}</div>
+      <div class="letter-name">${l.name}</div>
+    </div>`).join('');
+}
+
+function renderSalahSteps() {
+  const el = document.getElementById('salah-steps');
+  if(!el) return;
+  el.innerHTML = SALAH_STEPS.map((s,i)=>`
+    <div class="salah-step">
+      <div class="step-num">${i+1}</div>
+      <div>
+        <div class="step-title">${s.title}</div>
+        <div class="step-desc">${s.desc}</div>
+        ${s.arabic?`<span class="step-arabic">${s.arabic}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function renderWuduSteps() {
+  const el = document.getElementById('wudu-steps');
+  if(!el) return;
+  el.innerHTML = WUDU_STEPS.map((s,i)=>`
+    <div class="salah-step">
+      <div class="step-num">${i+1}</div>
+      <div>
+        <div class="step-title">${s.title}</div>
+        <div class="step-desc">${s.desc}</div>
+        ${s.arabic?`<span class="step-arabic">${s.arabic}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// DHIKR COUNTER
+// ══════════════════════════════════════════
+function selectDhikr(idx, el) {
+  document.querySelectorAll('.dhikr-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  STATE.dhikrIdx = idx;
+  STATE.dhikrCount = 0;
+  updateDhikrUI();
+}
+
+function tapDhikr() {
+  const dhikr = DHIKRS[STATE.dhikrIdx];
+  STATE.dhikrCount++;
+  if(STATE.dhikrCount >= dhikr.target) STATE.dhikrCount = dhikr.target;
+  updateDhikrUI();
+  // Haptic if supported
+  if(navigator.vibrate) navigator.vibrate(30);
+}
+
+function resetDhikr() {
+  STATE.dhikrCount = 0;
+  updateDhikrUI();
+}
+
+function updateDhikrUI() {
+  const d = DHIKRS[STATE.dhikrIdx];
+  document.getElementById('dhikr-arabic').textContent = d.arabic;
+  document.getElementById('dhikr-trans').textContent = d.trans;
+  document.getElementById('dhikr-num').textContent = STATE.dhikrCount;
+  document.getElementById('dhikr-target').textContent = `Target: ${d.target}`;
+  const pct = Math.min((STATE.dhikrCount/d.target)*100, 100);
+  document.getElementById('dhikr-fill').style.width = pct+'%';
+}
+
+// ══════════════════════════════════════════
+// GOALS
+// ══════════════════════════════════════════
+function renderGoals() {
+  const list = document.getElementById('goals-list');
+  if(!list) return;
+  list.innerHTML = STATE.goals.map((g,i)=>`
+    <div class="goal-item${g.done?' done':''}" onclick="toggleGoal(${i})">
+      <div class="goal-check">${g.done?'✓':''}</div>
+      <div class="goal-text">${g.text}</div>
+    </div>`).join('');
+}
+
+function toggleGoal(i) {
+  STATE.goals[i].done = !STATE.goals[i].done;
+  renderGoals();
+}
+
+function addGoal() {
+  const input = document.getElementById('new-goal-input');
+  const text = input.value.trim();
+  if(!text) return;
+  STATE.goals.push({text, done:false});
+  input.value = '';
+  renderGoals();
+}
+
+// ══════════════════════════════════════════
+// PRAYER TIMES (Astronomical Algorithm)
+// ══════════════════════════════════════════
+function rad(d){ return d * Math.PI / 180; }
+function deg(r){ return r * 180 / Math.PI; }
+
+function calcPrayerTimes(lat, lng) {
+  const now = new Date();
+  const timezone = -now.getTimezoneOffset() / 60;
+  const jdate = julianDate(now.getFullYear(), now.getMonth()+1, now.getDate());
+  const D = jdate - 2451545.0;
+
+  // Sun's mean longitude
+  const g = (357.529 + 0.98560028 * D) % 360;
+  const q = (280.459 + 0.98564736 * D) % 360;
+  const L = (q + 1.915 * Math.sin(rad(g)) + 0.020 * Math.sin(rad(2*g))) % 360;
+
+  // Sun's declination and equation of time
+  const e = 23.439 - 0.00000036 * D;
+  const sinDec = Math.sin(rad(e)) * Math.sin(rad(L));
+  const cosDec = Math.cos(Math.asin(sinDec));
+  const RA = deg(Math.atan2(Math.cos(rad(e)) * Math.sin(rad(L)), Math.cos(rad(L)))) / 15;
+  const EqT = q/15 - (RA % 24);
+
+  // Solar noon
+  const noon = 12 - lng/15 - EqT + timezone;
+
+  function sunAngle(angle) {
+    const cosH = (Math.sin(rad(-angle)) - Math.sin(rad(lat)) * sinDec) / (Math.cos(rad(lat)) * cosDec);
+    if(cosH < -1 || cosH > 1) return NaN;
+    return deg(Math.acos(cosH)) / 15;
+  }
+
+  // Asr (Shafi'i: shadow = 1x height)
+  function asrTime() {
+    const targetShadow = 1 / Math.tan(Math.asin(Math.sin(rad(Math.abs(lat - deg(Math.asin(sinDec)))))
+      / Math.sqrt(1 + Math.pow(1, 2))));
+    const cosH = (Math.sin(Math.atan(1/targetShadow)) - Math.sin(rad(lat)) * sinDec) / (Math.cos(rad(lat)) * cosDec);
+    if(Math.abs(cosH) > 1) return NaN;
+    return deg(Math.acos(cosH)) / 15;
+  }
+
+  const fajrOffset = sunAngle(18);
+  const maghribOffset = sunAngle(0.833);
+  const ishaOffset = sunAngle(17);
+  const asrOffset = asrTime();
+
+  function toTime(t) {
+    if(isNaN(t)) return 'N/A';
+    const h = Math.floor(t) % 24;
+    const m = Math.round((t % 1) * 60);
+    const hh = h < 0 ? h + 24 : h;
+    const mm = m < 0 ? m + 60 : m;
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    const h12 = hh % 12 || 12;
+    return `${h12}:${mm.toString().padStart(2,'0')} ${ampm}`;
+  }
+
+  return {
+    fajr:    toTime(noon - fajrOffset),
+    sunrise: toTime(noon - maghribOffset),
+    dhuhr:   toTime(noon + 0.033),
+    asr:     toTime(noon + asrOffset),
+    maghrib: toTime(noon + maghribOffset),
+    isha:    toTime(noon + ishaOffset),
+    raw: { noon, fajrOffset, maghribOffset, ishaOffset, asrOffset }
+  };
+}
+
+function julianDate(year, month, day) {
+  if(month <= 2) { year -= 1; month += 12; }
+  const A = Math.floor(year/100);
+  const B = 2 - A + Math.floor(A/4);
+  return Math.floor(365.25*(year+4716)) + Math.floor(30.6001*(month+1)) + day + B - 1524.5;
+}
+
+function getCurrentPrayer(times) {
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+
+  function parseMin(t) {
+    if(!t || t==='N/A') return -1;
+    const [time, ampm] = t.split(' ');
+    let [h,m] = time.split(':').map(Number);
+    if(ampm==='PM' && h!==12) h+=12;
+    if(ampm==='AM' && h===12) h=0;
+    return h*60+m;
+  }
+
+  const prayers = [
+    {name:'Fajr', min:parseMin(times.fajr)},
+    {name:'Dhuhr', min:parseMin(times.dhuhr)},
+    {name:'Asr', min:parseMin(times.asr)},
+    {name:'Maghrib', min:parseMin(times.maghrib)},
+    {name:'Isha', min:parseMin(times.isha)},
+  ];
+
+  let nextPrayer = 'Fajr';
+  for(let i=0; i<prayers.length; i++) {
+    if(nowMin < prayers[i].min) { nextPrayer = prayers[i].name; break; }
+    if(i===prayers.length-1) nextPrayer = 'Fajr'; // tomorrow
+  }
+  return nextPrayer;
+}
+
+function renderPrayerTimes(times, locationName, next) {
+  const card = document.getElementById('prayer-times-card');
+  const prayers = [
+    {name:'Fajr', time:times.fajr, icon:'🌙'},
+    {name:'Sunrise', time:times.sunrise, icon:'🌅'},
+    {name:'Dhuhr', time:times.dhuhr, icon:'☀️'},
+    {name:'Asr', time:times.asr, icon:'🌤️'},
+    {name:'Maghrib', time:times.maghrib, icon:'🌇'},
+    {name:'Isha', time:times.isha, icon:'🌙'},
+  ];
+
+  card.innerHTML = `
+    <div class="prayer-location">📍 ${locationName}</div>
+    ${prayers.map(p=>`
+      <div class="prayer-row ${p.name===next?'next-prayer':''}">
+        <span>${p.icon} ${p.name}</span>
+        <span>${p.time} ${p.name===next?'<span class="prayer-badge">Next</span>':''}</span>
+      </div>`).join('')}
+  `;
+}
+
+async function loadPrayerTimes() {
+  if(!navigator.geolocation) {
+    renderPrayerTimes(calcPrayerTimes(21.3891, 39.8579), 'Makkah (default)', 'Dhuhr');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const {latitude:lat, longitude:lng} = pos.coords;
+      const times = calcPrayerTimes(lat, lng);
+      const next = getCurrentPrayer(times);
+
+      // Try to get city name via reverse geocoding
+      let cityName = `${lat.toFixed(2)}°N, ${lng.toFixed(2)}°E`;
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+        const d = await r.json();
+        cityName = d.address?.city || d.address?.town || d.address?.county || cityName;
+      } catch(e) {}
+
+      renderPrayerTimes(times, cityName, next);
+    },
+    () => {
+      // Use Mumbai as fallback for India
+      const times = calcPrayerTimes(19.0760, 72.8777);
+      const next = getCurrentPrayer(times);
+      renderPrayerTimes(times, 'Mumbai (default)', next);
+    }
+  );
+}
+
+// ══════════════════════════════════════════
+// HOME INIT
+// ══════════════════════════════════════════
+function initHome() {
+  // Date
+  const now = new Date();
+  document.getElementById('today-date').textContent = now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Daily verse (rotate by day of year)
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(),0,0))/(1000*60*60*24));
+  const verse = QURAN_VERSES[dayOfYear % QURAN_VERSES.length];
+  document.getElementById('daily-ayah').innerHTML = `
+    <div style="font-size:10px;color:var(--gold);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">✦ Verse of the Day</div>
+    <div class="ayah-arabic">${verse.arabic}</div>
+    <div class="ayah-trans">${verse.trans}</div>
+    <div class="ayah-ref">${verse.ref}</div>
+  `;
+
+  // Daily hadith
+  const hadith = HADITHS[dayOfYear % HADITHS.length];
+  document.getElementById('daily-hadith').innerHTML = `
+    <div style="font-size:10px;color:var(--gold);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">✦ Hadith of the Day</div>
+    <div class="hadith-text">${hadith.text}</div>
+    <div class="hadith-ref">${hadith.ref}</div>
+  `;
+}
+
+// ══════════════════════════════════════════
+// LANGUAGE
+// ══════════════════════════════════════════
+function setLang(lang, el) {
+  STATE.lang = lang;
+  document.querySelectorAll('.lang-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// INIT APP
+// ══════════════════════════════════════════
+function init() {
+  initHome();
+  renderLetters();
+  renderSalahSteps();
+  renderWuduSteps();
+  renderGoals();
+  updateDhikrUI();
+  loadPrayerTimes();
+
+  // Bottom nav special mapping
+  const navBtns = document.querySelectorAll('.nav-btn');
+  navBtns[0].onclick = ()=>navigate('home');
+  navBtns[1].onclick = ()=>navigate('learn');
+  navBtns[2].onclick = ()=>navigate('ai');
+  navBtns[3].onclick = ()=>navigate('deen');
+  navBtns[4].onclick = ()=>navigate('profile');
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
